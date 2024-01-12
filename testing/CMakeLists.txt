@@ -21,9 +21,8 @@ include_directories(${EIGEN_DIR} ${BOOST_DIR} ${IGTL_DIR})
 # find_package(OpenIGTLink REQUIRED)
 # include(${OpenIGTLink_USE_FILE})
 
-include_directories(./Robots/)
 
-add_subdirectory(/home/yiwei/brp/ProstateRobotCommunication/testing/Robots/ProstateRobot)
+add_subdirectory(/home/yiwei/brp/ProstateRobotCommunication/testing/ProstateRobot)
 include_directories(/home/yiwei/brp/ProstateRobotCommunication)
 
 set(ROBOT_SIM_SOURCE

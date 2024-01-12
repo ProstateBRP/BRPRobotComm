@@ -7,23 +7,7 @@
 #ifndef _ProstateRobot_HPP_
 #define _ProstateRobot_HPP_
 
-#include "../Robot.hpp"
-
 #include <string>
-
-#include "Packets.hpp"
-#include "FPGA_Utilities.hpp"
-#include "ForceSensor.hpp"
-#include "ProstateKinematics.hpp"
-#include "ProstateRobotMotors.hpp"
-#include "ProstateRobotSensors.hpp"
-#include "ProstateRobotMotionController.hpp"
-#include "ProstateRobotKinematicsController.hpp"
-#include "ProstateRobotManualMode.hpp"
-#include "ProstateRobotClinicalMode.hpp"
-#include "ProstateRobotAutomatedHomingMode.hpp"
-#include "ProstateRobotFrequencySweepMode.hpp"
-#include "ProstateRobotActiveSteeringMode.hpp"
 
 using namespace std;
 
