@@ -1,45 +1,29 @@
-include_directories(${SURGICAL_ROBOT_SOURCE_DIR}/src/Robots/ProstateRobot/ProstateRobotMotors/)
-include_directories(${SURGICAL_ROBOT_SOURCE_DIR}/src/Robots/ProstateRobot/ProstateRobotUtils/)
-include_directories(${SURGICAL_ROBOT_SOURCE_DIR}/src/Robots/ProstateRobot/ProstateRobotMotors/)
-include_directories(${SURGICAL_ROBOT_SOURCE_DIR}/src/Robots/ProstateRobot/ProstateRobotSensors/)
-include_directories(${SURGICAL_ROBOT_SOURCE_DIR}/src/Robots/ProstateRobot/ProstateRobotKinematicsController/)
-include_directories(${SURGICAL_ROBOT_SOURCE_DIR}/src/Robots/ProstateRobot/ProstateRobotMotionController/)
-include_directories(${SURGICAL_ROBOT_SOURCE_DIR}/src/Robots/ProstateRobot/ProstateRobotModes/)
-include_directories(${SURGICAL_ROBOT_SOURCE_DIR}/src/NeedleSteeringAlgorithms)
-include_directories(${SURGICAL_ROBOT_SOURCE_DIR}/src/NeedleSteeringAlgorithms/CurvSteering/)
+PROJECT(BRPRobotIGTLTest)
 
-include_directories(${SURGICAL_ROBOT_SOURCE_DIR}/src/Communication/OpenIGTLink/NeuroRobotCommunication)
-include_directories(${SURGICAL_ROBOT_SOURCE_DIR}/src/Communication/OpenIGTLink/ProstateRobotCommunication)
+cmake_minimum_required(VERSION 3.1)
 
-add_library(OpenIGTLinkComm
-  ${SURGICAL_ROBOT_SOURCE_DIR}/src/Communication/OpenIGTLink/OpenIGTLink.cpp
+if(COMMAND cmake_policy)
+  cmake_policy(SET CMP0003 NEW)
+endif(COMMAND cmake_policy)
 
-  ${SURGICAL_ROBOT_SOURCE_DIR}/src/Communication/OpenIGTLink/ProstateRobotCommunication/ProstateRobotPhaseBase.cpp
-  ${SURGICAL_ROBOT_SOURCE_DIR}/src/Communication/OpenIGTLink/ProstateRobotCommunication/ProstateRobotStatus.cpp
-  ${SURGICAL_ROBOT_SOURCE_DIR}/src/Communication/OpenIGTLink/ProstateRobotCommunication/ProstateRobotCalibrationPhase.cpp
-  ${SURGICAL_ROBOT_SOURCE_DIR}/src/Communication/OpenIGTLink/ProstateRobotCommunication/ProstateRobotCommunicationBase.cpp
-  ${SURGICAL_ROBOT_SOURCE_DIR}/src/Communication/OpenIGTLink/ProstateRobotCommunication/ProstateRobotEmergencyPhase.cpp
-  ${SURGICAL_ROBOT_SOURCE_DIR}/src/Communication/OpenIGTLink/ProstateRobotCommunication/ProstateRobotManualPhase.cpp
-  ${SURGICAL_ROBOT_SOURCE_DIR}/src/Communication/OpenIGTLink/ProstateRobotCommunication/ProstateRobotMoveToTargetPhase.cpp
-  ${SURGICAL_ROBOT_SOURCE_DIR}/src/Communication/OpenIGTLink/ProstateRobotCommunication/ProstateRobotPlanningPhase.cpp
-  ${SURGICAL_ROBOT_SOURCE_DIR}/src/Communication/OpenIGTLink/ProstateRobotCommunication/ProstateRobotStartUpPhase.cpp
-  ${SURGICAL_ROBOT_SOURCE_DIR}/src/Communication/OpenIGTLink/ProstateRobotCommunication/ProstateRobotStopPhase.cpp
-  ${SURGICAL_ROBOT_SOURCE_DIR}/src/Communication/OpenIGTLink/ProstateRobotCommunication/ProstateRobotTargetingPhase.cpp
-  ${SURGICAL_ROBOT_SOURCE_DIR}/src/Communication/OpenIGTLink/ProstateRobotCommunication/ProstateRobotUndefinedPhase.cpp
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
+set(THREADS_PREFER_PTHREAD_FLAG TRUE)
+find_package(Threads REQUIRED)
 
-  ${SURGICAL_ROBOT_SOURCE_DIR}/src/Communication/OpenIGTLink/NeuroRobotCommunication/NeuroRobotPhaseBase.cpp
-  ${SURGICAL_ROBOT_SOURCE_DIR}/src/Communication/OpenIGTLink/NeuroRobotCommunication/NeuroRobotStatus.cpp
-  ${SURGICAL_ROBOT_SOURCE_DIR}/src/Communication/OpenIGTLink/NeuroRobotCommunication/NeuroRobotCalibrationPhase.cpp
-  ${SURGICAL_ROBOT_SOURCE_DIR}/src/Communication/OpenIGTLink/NeuroRobotCommunication/NeuroRobotCommunicationBase.cpp
-  ${SURGICAL_ROBOT_SOURCE_DIR}/src/Communication/OpenIGTLink/NeuroRobotCommunication/NeuroRobotEmergencyPhase.cpp
-  ${SURGICAL_ROBOT_SOURCE_DIR}/src/Communication/OpenIGTLink/NeuroRobotCommunication/NeuroRobotManualPhase.cpp
-  ${SURGICAL_ROBOT_SOURCE_DIR}/src/Communication/OpenIGTLink/NeuroRobotCommunication/NeuroRobotMoveToTargetPhase.cpp
-  ${SURGICAL_ROBOT_SOURCE_DIR}/src/Communication/OpenIGTLink/NeuroRobotCommunication/NeuroRobotPlanningPhase.cpp
-  ${SURGICAL_ROBOT_SOURCE_DIR}/src/Communication/OpenIGTLink/NeuroRobotCommunication/NeuroRobotStartUpPhase.cpp
-  ${SURGICAL_ROBOT_SOURCE_DIR}/src/Communication/OpenIGTLink/NeuroRobotCommunication/NeuroRobotStopPhase.cpp
-  ${SURGICAL_ROBOT_SOURCE_DIR}/src/Communication/OpenIGTLink/NeuroRobotCommunication/NeuroRobotTargetingPhase.cpp
-  ${SURGICAL_ROBOT_SOURCE_DIR}/src/Communication/OpenIGTLink/NeuroRobotCommunication/NeuroRobotUndefinedPhase.cpp
-  ${SURGICAL_ROBOT_SOURCE_DIR}/src/Communication/OpenIGTLink/NeuroRobotCommunication/NeuroRobotDrapingPhase.cpp
+find_package(OpenIGTLink REQUIRED)
+include(${OpenIGTLink_USE_FILE})
+
+add_subdirectory(./Robot/)
+add_subdirectory(./ProstateRobotCommunication/)
+
+set(ROBOT_SIM_SOURCE
+  main.cxx
 )
 
-TARGET_LINK_LIBRARIES(OpenIGTLinkComm OpenIGTLink ProstateRobot NeuroRobot)
+ADD_EXECUTABLE(RobotTest ${ROBOT_SIM_SOURCE})
+TARGET_LINK_LIBRARIES(RobotTest 
+Threads::Threads
+OpenIGTLinkComm
+Robot
+)
