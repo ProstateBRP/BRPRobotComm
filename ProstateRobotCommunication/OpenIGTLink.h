@@ -1,5 +1,11 @@
-#ifndef __OPENIGTLINK_HPP__
-#define __OPENIGTLINK_HPP__
+//============================================================================
+// Name        : OpenIGTLink.hpp
+// Author      : Produced in the WPI AIM Lab
+// Description : This file is where OpenIGT requests are handled
+//============================================================================
+
+#ifndef OPENIGTLINK_HPP_
+#define OPENIGTLINK_HPP_
 
 // System includes
 #include <iostream>
@@ -10,10 +16,12 @@
 #include <string>
 #include <vector>
 
+// Robot includes
+#include "../Robot/Robot.hpp"
 // IGTL includes
 #include "igtlServerSocket.h"
 
-// Prostate Robot Work Phase includes
+// Work Phase includes
 #include "ProstateRobotStatus.hpp"
 #include "ProstateRobotPhaseBase.hpp"
 #include "ProstateRobotUndefinedPhase.hpp"
@@ -25,38 +33,20 @@
 #include "ProstateRobotManualPhase.hpp"
 #include "ProstateRobotStopPhase.hpp"
 #include "ProstateRobotEmergencyPhase.hpp"
-// Neuro Robot Work Phase includes
-#include "NeuroRobotStatus.hpp"
-#include "NeuroRobotPhaseBase.hpp"
-#include "NeuroRobotUndefinedPhase.hpp"
-#include "NeuroRobotStartUpPhase.hpp"
-#include "NeuroRobotPlanningPhase.hpp"
-#include "NeuroRobotCalibrationPhase.hpp"
-#include "NeuroRobotTargetingPhase.hpp"
-#include "NeuroRobotMoveToTargetPhase.hpp"
-#include "NeuroRobotManualPhase.hpp"
-#include "NeuroRobotStopPhase.hpp"
-#include "NeuroRobotEmergencyPhase.hpp"
-#include "NeuroRobotDrapingPhase.hpp"
 
-template <typename TRobot>
 class OpenIGTLink
 {
 public:
 	//================ Constructor ================
-	OpenIGTLink(shared_ptr<TRobot> robot, int port);
+	OpenIGTLink(Robot *robot, int port);
 
 	//================ Parameters =================
-	int clientSocketConnected{1};
+	 int clientSocketConnected{1};
 	igtl::Socket::Pointer socket;
-	shared_ptr<TRobot> robot;
-	bool retransmit;
+	Robot *robot;
 	int port;
-	// For TCP Keep Alive
-	bool keepAlive;
-	Timer keepAliveTimer;
-	std::vector<shared_ptr<ProstateRobotPhaseBase>> prostate_workphase_list{};
-	std::vector<shared_ptr<NeuroRobotPhaseBase>> neuro_workphase_list{};
+
+	std::vector<ProstateRobotPhaseBase* > WorkphaseList;
 
 	//================ Public Methods ==============
 	// This method receives data to the controller via OpenIGTLink
@@ -66,4 +56,4 @@ public:
 	void DisconnectSocket();
 };
 
-#endif /* __OPENIGTLINK_HPP__ */
+#endif /* OPENIGTLINK_HPP_ */
