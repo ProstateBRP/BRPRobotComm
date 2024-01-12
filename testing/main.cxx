@@ -19,7 +19,7 @@
 #include <pthread.h>
 #include <unistd.h>
 #include "./Robot/Robot.hpp"
-#include "./Server/OpenIGTLink.h"
+#include "./OpenIGTLink/OpenIGTLink.h"
 
 void RobotFunctionality(Robot *robot, Timer _timer, unsigned int loopRate, int port)
 {
