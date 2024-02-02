@@ -18,10 +18,13 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <unistd.h>
-#include "./Robot/Robot.hpp"
-#include "./OpenIGTLink/OpenIGTLink.h"
+#include "./ProstateRobot/ProstateRobot.hpp"
+#include "./OpenIGTLink/OpenIGTLink.hpp"
+#include "./Utilities/Logger/Logger.hpp"
+#include "./Utilities/Timer/Timer.hpp"
 
-void RobotFunctionality(Robot *robot, Timer _timer, unsigned int loopRate, int port)
+template <typename TRobot>
+void RobotFunctionality(shared_ptr<TRobot> _robot, Timer _timer, unsigned int loopRate, int port)
 {
 
 	//====================================== PTHREADS ========================================
@@ -39,16 +42,17 @@ void RobotFunctionality(Robot *robot, Timer _timer, unsigned int loopRate, int p
 
 	// Create a thread for OpenIGT Communications
 	pthread_t _igtID;
-	OpenIGTLink _igtModule = OpenIGTLink(robot, port);
+	OpenIGTLink<TRobot> _igtModule = OpenIGTLink<TRobot>(_robot, 18936);
 	void *_joinIgt;
-	pthread_create(&_igtID, NULL, &OpenIGTLink::ThreadIGT, (void *)&_igtModule);
+	pthread_create(&_igtID, NULL, &OpenIGTLink<TRobot>::ThreadIGT, (void *)&_igtModule);
+	vector<OpenIGTLink<TRobot> *> _igtList = {&_igtModule};
 	pthread_setaffinity_np(_igtID, sizeof(cpu_set_t), &cpuset1);
 
 	//====================================== MAIN LOOP ========================================
 	// Launch main robot program
 	while (1)
 	{
-		robot->UpdateRobot();
+		_robot->Update();
 		// Profile code to maintain a consistent loop time
 		do
 		{
@@ -64,7 +68,7 @@ int main(int argc, char *argv[])
 {
 	// Log that the system has been initialized
 	Logger &log = Logger::GetInstance();
-	log.Log("Starting robot system...", LOG_LEVEL_INFO, true);
+	log.Log("Starting ProstateRobot Comm testing...", logger::INFO, true);
 
 	// Create a Timer to profile the while loop at the bottom of this main() And determine a loop rate
 	Timer _timer;
@@ -77,9 +81,10 @@ int main(int argc, char *argv[])
 	{
 		port = atoi(argv[1]);
 	}
-	string ss = "Launching Simulated Robot On Port " + std::to_string(port);
-	Robot robot = Robot();
-	RobotFunctionality(&robot, _timer, loopRate, port);
+	string ss = "Launching ProstateRobot Comm testing system on port " + std::to_string(port);
+	ProstateRobot _robot = ProstateRobot();
+	std::shared_ptr<ProstateRobot> robot_ptr(&_robot, [](ProstateRobot*) {});
+	RobotFunctionality<ProstateRobot>(robot_ptr, _timer, loopRate, port);
 	
 	return 0;
 }

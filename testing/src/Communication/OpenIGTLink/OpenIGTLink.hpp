@@ -25,19 +25,19 @@
 #include "ProstateRobotManualPhase.hpp"
 #include "ProstateRobotStopPhase.hpp"
 #include "ProstateRobotEmergencyPhase.hpp"
-// Neuro Robot Work Phase includes
-#include "NeuroRobotStatus.hpp"
-#include "NeuroRobotPhaseBase.hpp"
-#include "NeuroRobotUndefinedPhase.hpp"
-#include "NeuroRobotStartUpPhase.hpp"
-#include "NeuroRobotPlanningPhase.hpp"
-#include "NeuroRobotCalibrationPhase.hpp"
-#include "NeuroRobotTargetingPhase.hpp"
-#include "NeuroRobotMoveToTargetPhase.hpp"
-#include "NeuroRobotManualPhase.hpp"
-#include "NeuroRobotStopPhase.hpp"
-#include "NeuroRobotEmergencyPhase.hpp"
-#include "NeuroRobotDrapingPhase.hpp"
+// // Neuro Robot Work Phase includes
+// #include "NeuroRobotStatus.hpp"
+// #include "NeuroRobotPhaseBase.hpp"
+// #include "NeuroRobotUndefinedPhase.hpp"
+// #include "NeuroRobotStartUpPhase.hpp"
+// #include "NeuroRobotPlanningPhase.hpp"
+// #include "NeuroRobotCalibrationPhase.hpp"
+// #include "NeuroRobotTargetingPhase.hpp"
+// #include "NeuroRobotMoveToTargetPhase.hpp"
+// #include "NeuroRobotManualPhase.hpp"
+// #include "NeuroRobotStopPhase.hpp"
+// #include "NeuroRobotEmergencyPhase.hpp"
+// #include "NeuroRobotDrapingPhase.hpp"
 
 template <typename TRobot>
 class OpenIGTLink
@@ -54,9 +54,9 @@ public:
 	int port;
 	// For TCP Keep Alive
 	bool keepAlive;
-	Timer keepAliveTimer;
+	// Timer keepAliveTimer;
 	std::vector<shared_ptr<ProstateRobotPhaseBase>> prostate_workphase_list{};
-	std::vector<shared_ptr<NeuroRobotPhaseBase>> neuro_workphase_list{};
+	// std::vector<shared_ptr<NeuroRobotPhaseBase>> neuro_workphase_list{};
 
 	//================ Public Methods ==============
 	// This method receives data to the controller via OpenIGTLink

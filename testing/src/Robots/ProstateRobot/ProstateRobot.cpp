@@ -64,10 +64,10 @@ void ProstateRobot::Update()
 	// Update sensor and encoder readings via the SPI packets
 	motion_controller_.UpdateMotorReadings();
 	sensors_.UpdateSensorReadings();
-
 	if (_mode == kRobotModes.CLINICAL_MODE)
 	{
-		clinical_mode->Run(current_state);
+		// motors_queue.front()->_setpointList.pop();
+		clinical_mode->Run(current_state, motors_queue); // Set the setpoints to the home configuration.
 	}
 	else if (_mode == kRobotModes.MANUAL_MODE)
 	{
@@ -100,13 +100,22 @@ void ProstateRobot::RunInverseKinematics()
 {
 	// Define the desired target w.r.t robot base
 	base_to_desired_target_robot_coord = ConvertFromImagerToRobotBase(target_full_pose_image_coord);
-	cout << "TGT RBT COORD:\n" << base_to_desired_target_robot_coord << endl;
 	// Find kinematically valid setpoints based on the received target
 	ProstateRobotMotorSetpointMap valid_axis_setpoints = kinematics_controller_.CalculateKinematicallyValidSetpoints(base_to_desired_target_robot_coord);
 	// Update motor values based on validated setpoints
-	for (auto it = valid_axis_setpoints.begin(); it != valid_axis_setpoints.end(); it++)
-	{
-		motors_.SetDesiredSetpoint(it->first, it->second);
+	if (_mode == kRobotModes.CLINICAL_MODE)
+	{	
+		Logger &log = Logger::GetInstance();
+		log.Log("In Clinical Mode, run Syn Motion.", logger::INFO, true);
+		InitSynMotion(valid_axis_setpoints);
+	}
+	else
+	{	
+		// set setpoints
+		for (auto it = valid_axis_setpoints.begin(); it != valid_axis_setpoints.end(); it++)
+		{
+			motors_.SetDesiredSetpoint(it->first, it->second);
+		}
 	}
 	// Log the IK output and print it to the console
 	LogInverseKinematicsOutput();
@@ -114,6 +123,59 @@ void ProstateRobot::RunInverseKinematics()
 	ProstateRobotForwardKinematicsInput fk_input = GetAllMotorsSetpointPositionUnit();
 	Eigen::Matrix<double, 4, 4, Eigen::DontAlign> reachable_target_pose_robot_coord = prostate_kinematics_.ForwardKinematics(fk_input).BaseToTreatment;
 	reachable_target_pose_imager_coord = ConvertFromRobotBaseToImager(reachable_target_pose_robot_coord);
+}
+
+void ProstateRobot::InitSynMotion(ProstateRobotMotorSetpointMap valid_axis_setpoints)
+{
+	Logger &log = Logger::GetInstance();
+	log.Log("Syn Motion", logger::INFO, true);
+
+	// empty motors_queue
+	while (!motors_queue.empty())
+	{
+		motors_queue.pop();
+	}
+
+	// Find the step number based on max diff
+	vector<int> diff_list;
+	for (auto it = valid_axis_setpoints.begin(); it != valid_axis_setpoints.end(); it++)
+	{
+		diff_list.push_back(motors_.CalculateMotionDiff(it->first, it->second));
+	}
+	int max_diff = *max_element(diff_list.begin(), diff_list.end());
+
+	int step_num = 45;
+	if (max_diff <= 1e5)
+	{
+		step_num = 10;
+	}
+	else if (max_diff <= 2e5)
+	{
+		step_num = 20;
+	}
+	else if (max_diff <= 3e5)
+	{
+		step_num = 30;
+	}
+	else if (max_diff <= 4e5)
+	{
+		step_num = 40;
+	}
+	// Generate the setpoint lists
+	for (auto it = valid_axis_setpoints.begin(); it != valid_axis_setpoints.end(); it++)
+	{
+		if  (it->first == ProstateRobotMotor::INSERTION)
+		{
+			motors_.SetDesiredSetpoint(it->first, it->second);
+		}
+		else
+		{
+			motors_.SaveSetpointList(it->first, it->second, step_num);
+			motors_queue.push(motors_.GetMotor(it->first));
+		}
+	}
+
+
 }
 
 void ProstateRobot::LogInverseKinematicsOutput()
@@ -137,7 +199,6 @@ ProstateRobotForwardKinematicsInput ProstateRobot::GetAllMotorsSetpointPositionU
 	fk_input.back_left = motors_.GetMotor(ProstateRobotMotor::BACK_LEFT)->GetSetPointInPositionUnit();
 	fk_input.back_right = motors_.GetMotor(ProstateRobotMotor::BACK_RIGHT)->GetSetPointInPositionUnit();
 	fk_input.insertion = motors_.GetMotor(ProstateRobotMotor::INSERTION)->GetSetPointInPositionUnit();
-	fk_input.rotation = motors_.GetMotor(ProstateRobotMotor::ROTATION)->GetSetPointInPositionUnit();
 	return fk_input;
 }
 
@@ -149,7 +210,6 @@ ProstateRobotForwardKinematicsInput ProstateRobot::GetAllMotorsCurrentPositionUn
 	fk_input.back_left = motors_.GetMotor(ProstateRobotMotor::BACK_LEFT)->GetEncoderPositionUnit();
 	fk_input.back_right = motors_.GetMotor(ProstateRobotMotor::BACK_RIGHT)->GetEncoderPositionUnit();
 	fk_input.insertion = motors_.GetMotor(ProstateRobotMotor::INSERTION)->GetEncoderPositionUnit();
-	fk_input.rotation = motors_.GetMotor(ProstateRobotMotor::ROTATION)->GetEncoderPositionUnit();
 	return fk_input;
 }
 

@@ -1,0 +1,2 @@
+add_library(ProstateRobotUtils INTERFACE)
+target_include_directories(ProstateRobotUtils INTERFACE {CMAKE_CURRENT_SOURCE_DIR})
