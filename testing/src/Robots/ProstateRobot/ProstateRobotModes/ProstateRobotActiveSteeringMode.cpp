@@ -37,49 +37,49 @@ void ProstateRobotActiveSteeringMode::Run(const std::string &current_state)
 
 void ProstateRobotActiveSteeringMode::ActiveCompensation()
 {
-    Motor *insertion = motion_ctrl->motors->GetMotor(ProstateRobotMotor::INSERTION);
-    Motor *rotation = motion_ctrl->motors->GetMotor(ProstateRobotMotor::ROTATION);
-    double insertion_old = insertion->GetEncoderLastPositionUnit();
-    double rotation_old = rotation->GetEncoderLastPositionUnit();
-    double w_hat = curv_steering->CalcRotationalVel(rotation->GetEncoderPositionUnit());
-    double desired_vel_rpm = CalcVelocityRpm(w_hat);
-    // Profile desired angular velocity
-    Logger &logger = Logger::GetInstance();
-    string msg = {"Desired Vel: " + to_string(desired_vel_rpm)};
-    logger.Log(msg, logger::INFO, false);
-    // Use abs to remove the sign for controller input calculation (the reported vel in motor space is unsigned)
-    rotation->_velocity_controller.SetVelSetpoint(abs(desired_vel_rpm));
-    // Calculate commanded velocity based on observed velocity and time elapsed. Multiplying by signbit brings back the original velocity sign.
-    double elapsed_time_sec = timer.ConvertMicrosecToSec(timer.time());
-    double commanded_vel_rpm = rotation->_velocity_controller.CalculateVelInputCommand(ConvertMotorTicksPerSecToRpm(rotation), elapsed_time_sec) * (std::signbit(w_hat) ? -1 : 1);
-    rotation->_velocity = CalcVelocityFreq(commanded_vel_rpm);
-    // Check for direction change and send 10 stop commands to the FPGA. NOTE: Will be refactored once Charles enables auto direction change detection in the FPGA level.
-    if (CheckDirectionChange(w_hat))
-    {
-        if (CommandRotationToStop(rotation))
-        {
-            old_dir = (old_dir == RotationDirection::CCW) ? RotationDirection::CW : RotationDirection::CCW;
-        }
-    }
-    // If direction has not changed keep sending the setpoints which in turn will determine the table value (rotation dir).
-    else
-    {
-        UpdateRotationDirection(w_hat, rotation);
-        rotation->MoveMotor();
-    }
-    insertion->MoveMotor();
+    // Motor *insertion = motion_ctrl->motors->GetMotor(ProstateRobotMotor::INSERTION);
+    // Motor *rotation = motion_ctrl->motors->GetMotor(ProstateRobotMotor::ROTATION);
+    // double insertion_old = insertion->GetEncoderLastPositionUnit();
+    // double rotation_old = rotation->GetEncoderLastPositionUnit();
+    // double w_hat = curv_steering->CalcRotationalVel(rotation->GetEncoderPositionUnit());
+    // double desired_vel_rpm = CalcVelocityRpm(w_hat);
+    // // Profile desired angular velocity
+    // Logger &logger = Logger::GetInstance();
+    // string msg = {"Desired Vel: " + to_string(desired_vel_rpm)};
+    // logger.Log(msg, logger::INFO, false);
+    // // Use abs to remove the sign for controller input calculation (the reported vel in motor space is unsigned)
+    // rotation->_velocity_controller.SetVelSetpoint(abs(desired_vel_rpm));
+    // // Calculate commanded velocity based on observed velocity and time elapsed. Multiplying by signbit brings back the original velocity sign.
+    // double elapsed_time_sec = timer.ConvertMicrosecToSec(timer.time());
+    // double commanded_vel_rpm = rotation->_velocity_controller.CalculateVelInputCommand(ConvertMotorTicksPerSecToRpm(rotation), elapsed_time_sec) * (std::signbit(w_hat) ? -1 : 1);
+    // rotation->_velocity = CalcVelocityFreq(commanded_vel_rpm);
+    // // Check for direction change and send 10 stop commands to the FPGA. NOTE: Will be refactored once Charles enables auto direction change detection in the FPGA level.
+    // if (CheckDirectionChange(w_hat))
+    // {
+    //     if (CommandRotationToStop(rotation))
+    //     {
+    //         old_dir = (old_dir == RotationDirection::CCW) ? RotationDirection::CW : RotationDirection::CCW;
+    //     }
+    // }
+    // // If direction has not changed keep sending the setpoints which in turn will determine the table value (rotation dir).
+    // else
+    // {
+    //     UpdateRotationDirection(w_hat, rotation);
+    //     rotation->MoveMotor();
+    // }
+    // insertion->MoveMotor();
 
-    msg.clear();
-    // Profile measured angular velocity
-    msg = "Measured Vel: " + to_string((std::signbit(w_hat) ? -1 : 1) * ConvertMotorTicksPerSecToRpm(rotation));
-    logger.Log(msg, logger::INFO, false);
-    // Profile angle and time
-    msg.clear();
-    msg = "Theta is: " + to_string(rotation->GetEncoderPositionUnit() * 180 / M_PI);
-    logger.Log(msg, logger::INFO, false);
-    msg.clear();
-    msg = "Time elapsed is: " + to_string(timer.ConvertMicrosecToSec(timer.time()));
-    logger.Log(msg, logger::INFO, false);
+    // msg.clear();
+    // // Profile measured angular velocity
+    // msg = "Measured Vel: " + to_string((std::signbit(w_hat) ? -1 : 1) * ConvertMotorTicksPerSecToRpm(rotation));
+    // logger.Log(msg, logger::INFO, false);
+    // // Profile angle and time
+    // msg.clear();
+    // msg = "Theta is: " + to_string(rotation->GetEncoderPositionUnit() * 180 / M_PI);
+    // logger.Log(msg, logger::INFO, false);
+    // msg.clear();
+    // msg = "Time elapsed is: " + to_string(timer.ConvertMicrosecToSec(timer.time()));
+    // logger.Log(msg, logger::INFO, false);
 }
 
 bool ProstateRobotActiveSteeringMode::CheckDirectionChange(const double &commanded_w_hat)
@@ -94,36 +94,48 @@ bool ProstateRobotActiveSteeringMode::CheckDirectionChange(const double &command
     }
 }
 
-bool ProstateRobotActiveSteeringMode::CommandRotationToStop(Motor *rotation)
+bool ProstateRobotActiveSteeringMode::CommandRotationToStop()
 {
-    // Send 5 consecutive stop commands to the motor
-    // TODO: Charles will enable direction change detection on the card
-    if (stop_counter < 10)
-    {
-        stop_counter++;
-    }
-    else
-    {
-        stop_counter = 0;
-        return true;
-    }
-    rotation->StopMotor();
     return false;
 }
+// bool ProstateRobotActiveSteeringMode::CommandRotationToStop(Motor *rotation)
+// {
+//     return false;
+// }
 
-void ProstateRobotActiveSteeringMode::UpdateRotationDirection(const double &commanded_w_hat, Motor *rotation)
-{
-    if (commanded_w_hat < 0)
-    {
-        rotation->_setpoint = -1e6;
-        old_dir = RotationDirection::CCW;
-    }
-    else
-    {
-        rotation->_setpoint = 1e6;
-        old_dir = RotationDirection::CW;
-    }
-}
+// bool ProstateRobotActiveSteeringMode::CommandRotationToStop(Motor *rotation)
+// {
+//     // Send 5 consecutive stop commands to the motor
+//     // TODO: Charles will enable direction change detection on the card
+//     if (stop_counter < 10)
+//     {
+//         stop_counter++;
+//     }
+//     else
+//     {
+//         stop_counter = 0;
+//         return true;
+//     }
+//     rotation->StopMotor();
+//     return false;
+// }
+
+void ProstateRobotActiveSteeringMode::UpdateRotationDirection(){}
+
+// void ProstateRobotActiveSteeringMode::UpdateRotationDirection(const double &commanded_w_hat, Motor *rotation)
+// {
+//     if (commanded_w_hat < 0)
+//     {
+//         rotation->_setpoint = -1e6;
+//         old_dir = RotationDirection::CCW;
+//     }
+//     else
+//     {
+//         rotation->_setpoint = 1e6;
+//         old_dir = RotationDirection::CW;
+//     }
+// }
+
 double ProstateRobotActiveSteeringMode::CalcVelocityRpm(const double &w_hat)
 {
     if (round(w_hat * 1000) / 1000 == 0.0)
@@ -148,8 +160,9 @@ int ProstateRobotActiveSteeringMode::CalcVelocityFreq(const double &des_vel_rpm)
 
 double ProstateRobotActiveSteeringMode::GetRotationMotorPositionUnit()
 {
-    Motor *rotation = motion_ctrl->motors->GetMotor(ProstateRobotMotor::ROTATION);
-    return rotation->GetEncoderPositionUnit();
+    // Motor *rotation = motion_ctrl->motors->GetMotor(ProstateRobotMotor::ROTATION);
+    // return rotation->GetEncoderPositionUnit();
+    return 0;
 }
 
 int ProstateRobotActiveSteeringMode::LinearInterpolation(double des_rpm, const vector<double> &rpm_data, const vector<int> &freq_data)
@@ -187,10 +200,15 @@ int ProstateRobotActiveSteeringMode::LinearInterpolation(double des_rpm, const v
     return result;
 }
 
-double ProstateRobotActiveSteeringMode::ConvertMotorTicksPerSecToRpm(Motor *motor)
+double ProstateRobotActiveSteeringMode::ConvertMotorTicksPerSecToRpm()
 {
-    return motor->GetEncoderVelocity() * (60 / (motor->_ticksPerUnit * 2 * M_PI)); // Get RPM velocity ;
+    return 0;
 }
+
+// double ProstateRobotActiveSteeringMode::ConvertMotorTicksPerSecToRpm(Motor *motor)
+// {
+//     return motor->GetEncoderVelocity() * (60 / (motor->_ticksPerUnit * 2 * M_PI)); // Get RPM velocity ;
+// }
 
 //======================== LEGACY VELOCITY CALCULATION CODE ========================
 // double unsigned_w_hat = abs(w_hat);

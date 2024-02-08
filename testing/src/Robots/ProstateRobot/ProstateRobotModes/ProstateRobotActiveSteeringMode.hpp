@@ -4,7 +4,7 @@
 #include "ProstateRobotModeBase.hpp"
 #include "PolyFit.h"
 #include "ProstateRobotConstants.hpp"
-#include "BicycleKinematics.h"
+// #include "BicycleKinematics.h"
 #include "CurvSteering.h"
 #include "ProstateRobotKinematicsController.hpp"
 
@@ -17,18 +17,21 @@ public:
     int CalcVelocityFreq(const double &);
     double CalcVelocityRpm(const double &);
     bool CheckDirectionChange(const double &);
-    bool CommandRotationToStop(Motor *);
+    bool CommandRotationToStop();
+    // bool CommandRotationToStop(Motor *);
     void SetAlpha(double alpha) { curv_steering->alpha = alpha; }
     void SetTargetAngle(double value) { curv_steering->theta_d = value; }
     void SetCurvMethod(CurvMethod method) { curv_steering->curv_method = method; }
     void UpdateCurvParams(const Eigen::Matrix<double, 4, 1, Eigen::DontAlign> &);
     void ActiveCompensation();
-    void UpdateRotationDirection(const double &, Motor *);
+    void UpdateRotationDirection();
+    // void UpdateRotationDirection(const double &, Motor *);
     const double GetAlpha() { return curv_steering->alpha; }
     const double GetTargetAngle() { return curv_steering->theta_d; }
     double GetRotationMotorPositionUnit();
     int LinearInterpolation(double des_rpm, const vector<double> &, const vector<int> &);
-    double ConvertMotorTicksPerSecToRpm(Motor *);
+    double ConvertMotorTicksPerSecToRpm();
+    // double ConvertMotorTicksPerSecToRpm(Motor *);
 
 private:
     Timer timer;

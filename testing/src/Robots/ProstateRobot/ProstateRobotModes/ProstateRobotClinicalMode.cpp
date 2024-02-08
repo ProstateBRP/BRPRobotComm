@@ -18,181 +18,185 @@ ProstateRobotClinicalMode::ProstateRobotClinicalMode(ProstateRobotMotionControll
 	timer.tic();
 }
 
-void ProstateRobotClinicalMode::Run(const std::string &current_state, std::queue<Motor*> &motors_queue)
-{
-	timer.toc();
-	Logger &log = Logger::GetInstance();
-	if (current_state == robot_state.TARGETING)
-	{
-		int reached_motor = 0;
-		bool syn_motion = true;
-		if (IsFootPedalPressed())
-		{
-			// Only move base (no insertion and rotation)
-			if (syn_motion)
-			{
-				Motor *motor = motors_queue.front();
-				// stop all motors
-				motion_ctrl->StopRobotMotion();
+void ProstateRobotClinicalMode::Run(const std::string &current_state){}
 
-				if (motor->IsMotorWithinSetpointBounds())
-				{
-					log.Log("Motor " + motor->_name + " reached setpoint.", logger::INFO, true);
-					if (!motor->_setpointList.empty())
-					{
-						motor->_setpointList.pop();
-					}
-					log.Log("Setpoint List Length: " + to_string(motor->_setpointList.size()), logger::INFO, true);
-					if (!motor->_setpointList.empty())
-					{
-						motor->_setpoint = motor->_setpointList.front();
-					}
-					else
-					{
-						log.Log("Setpoint List is empty.", logger::INFO, true);
-						motor->StopMotor();
-						motor->DisableMotor();
-					}
+// void ProstateRobotClinicalMode::Run(const std::string &current_state, std::queue<Motor*> &motors_queue)
+// {
+// 	timer.toc();
+// 	Logger &log = Logger::GetInstance();
+// 	if (current_state == robot_state.TARGETING)
+// 	{
+// 		int reached_motor = 0;
+// 		bool syn_motion = true;
+// 		if (IsFootPedalPressed())
+// 		{
+// 			// Only move base (no insertion and rotation)
+// 			if (syn_motion)
+// 			{
+// 				Motor *motor = motors_queue.front();
+// 				// stop all motors
+// 				motion_ctrl->StopRobotMotion();
 
-					motors_queue.push(motor);
-					motors_queue.pop();
-				}
-				else
-				{
-					motor->MoveMotor();
-				}
-			}
-			else
-			{
-				if (!isInTargetingPos())
-				{
-					// TODO: Move the needle tip to be flushed with the needle guide. https://wpiaimlab.atlassian.net/browse/MRC-50
-					MoveMotorsTargeting();
-				}
-				else
-				{
-					motion_ctrl->StopRobotMotion();
-					motion_ctrl->DisableAllMotors();
-				}
-			}
+// 				if (motor->IsMotorWithinSetpointBounds())
+// 				{
+// 					log.Log("Motor " + motor->_name + " reached setpoint.", logger::INFO, true);
+// 					if (!motor->_setpointList.empty())
+// 					{
+// 						motor->_setpointList.pop();
+// 					}
+// 					log.Log("Setpoint List Length: " + to_string(motor->_setpointList.size()), logger::INFO, true);
+// 					if (!motor->_setpointList.empty())
+// 					{
+// 						motor->_setpoint = motor->_setpointList.front();
+// 					}
+// 					else
+// 					{
+// 						log.Log("Setpoint List is empty.", logger::INFO, true);
+// 						motor->StopMotor();
+// 						motor->DisableMotor();
+// 					}
+
+// 					motors_queue.push(motor);
+// 					motors_queue.pop();
+// 				}
+// 				else
+// 				{
+// 					motor->MoveMotor();
+// 				}
+// 			}
+// 			else
+// 			{
+// 				if (!isInTargetingPos())
+// 				{
+// 					// TODO: Move the needle tip to be flushed with the needle guide. https://wpiaimlab.atlassian.net/browse/MRC-50
+// 					MoveMotorsTargeting();
+// 				}
+// 				else
+// 				{
+// 					motion_ctrl->StopRobotMotion();
+// 					motion_ctrl->DisableAllMotors();
+// 				}
+// 			}
 			
-		}
-		else
-		{ // Update Motor Stall Detect
-			RunIdle();
-		}
-	}
-	else if (current_state == robot_state.MOVE_TO_TARGET)
-	{
-		if (IsFootPedalPressed())
-		{
-			if (isRetractingNeedle())
-			{
-				RetractNeedle();
-			}
-			else if (!hasReachedTarget())
-			{
-				ActiveCompensation();
-			}
-			else
-			{
-				motion_ctrl->StopRobotMotion();
-				motion_ctrl->DisableAllMotors();
-			}
-		}
-		else
-		{
-			RunIdle();
-		}
-	}
-	else
-	{
-		// Update Motor Stall Detect
-		RunIdle();
-	}
-	timer.tic();
-}
+// 		}
+// 		else
+// 		{ // Update Motor Stall Detect
+// 			RunIdle();
+// 		}
+// 	}
+// 	else if (current_state == robot_state.MOVE_TO_TARGET)
+// 	{
+// 		if (IsFootPedalPressed())
+// 		{
+// 			if (isRetractingNeedle())
+// 			{
+// 				RetractNeedle();
+// 			}
+// 			else if (!hasReachedTarget())
+// 			{
+// 				ActiveCompensation();
+// 			}
+// 			else
+// 			{
+// 				motion_ctrl->StopRobotMotion();
+// 				motion_ctrl->DisableAllMotors();
+// 			}
+// 		}
+// 		else
+// 		{
+// 			RunIdle();
+// 		}
+// 	}
+// 	else
+// 	{
+// 		// Update Motor Stall Detect
+// 		RunIdle();
+// 	}
+// 	timer.tic();
+// }
 
 void ProstateRobotClinicalMode::ActiveCompensation()
 {
-	Motor *insertion = motion_ctrl->motors->GetMotor(ProstateRobotMotor::INSERTION);
-	Motor *rotation = motion_ctrl->motors->GetMotor(ProstateRobotMotor::ROTATION);
+	// Motor *insertion = motion_ctrl->motors->GetMotor(ProstateRobotMotor::INSERTION);
+	// Motor *rotation = motion_ctrl->motors->GetMotor(ProstateRobotMotor::ROTATION);
 
-	double insertion_old = insertion->GetEncoderLastPositionUnit();
-	double rotation_old = rotation->GetEncoderLastPositionUnit();
+	// double insertion_old = insertion->GetEncoderLastPositionUnit();
+	// double rotation_old = rotation->GetEncoderLastPositionUnit();
 
-	double w_hat = curv_steering->CalcRotationalVel(rotation->GetEncoderPositionUnit());
-	double desired_vel_rpm = CalcVelocityRpm(w_hat);
-	// Use abs to remove the sign for controller input calculation (the reported vel in motor space is unsigned)
-	rotation->_velocity_controller.SetVelSetpoint(abs(desired_vel_rpm));
-	// Calculate commanded velocity based on observed velocity and time elapsed. Multiplying by signbit brings back the original velocity sign.
-	double elapsed_time_sec = timer.ConvertMicrosecToSec(timer.time());
-	double commanded_vel_rpm = rotation->_velocity_controller.CalculateVelInputCommand(ConvertMotorTicksPerSecToRpm(rotation), elapsed_time_sec) * (std::signbit(w_hat) ? -1 : 1);
-	rotation->_velocity = CalcVelocityFreq(commanded_vel_rpm);
-	// Check for direction change and send three stop commands to the FPGA. NOTE: Will be refactored once Charles enables auto direction change detection in the FPGA level.
-	if (CheckDirectionChange(w_hat))
-	{
-		if (CommandRotationToStop(rotation))
-		{
-			old_dir = (old_dir == RotationDirection::CCW) ? RotationDirection::CW : RotationDirection::CCW;
-		}
-	}
-	// If direction has not changed keep sending the setpoints which in turn will determine the table value (rotation dir).
-	else
-	{
-		UpdateRotationDirection(w_hat, rotation);
-		rotation->MoveMotor();
-	}
-	insertion->MoveMotor();
+	// double w_hat = curv_steering->CalcRotationalVel(rotation->GetEncoderPositionUnit());
+	// double desired_vel_rpm = CalcVelocityRpm(w_hat);
+	// // Use abs to remove the sign for controller input calculation (the reported vel in motor space is unsigned)
+	// rotation->_velocity_controller.SetVelSetpoint(abs(desired_vel_rpm));
+	// // Calculate commanded velocity based on observed velocity and time elapsed. Multiplying by signbit brings back the original velocity sign.
+	// double elapsed_time_sec = timer.ConvertMicrosecToSec(timer.time());
+	// double commanded_vel_rpm = rotation->_velocity_controller.CalculateVelInputCommand(ConvertMotorTicksPerSecToRpm(rotation), elapsed_time_sec) * (std::signbit(w_hat) ? -1 : 1);
+	// rotation->_velocity = CalcVelocityFreq(commanded_vel_rpm);
+	// // Check for direction change and send three stop commands to the FPGA. NOTE: Will be refactored once Charles enables auto direction change detection in the FPGA level.
+	// if (CheckDirectionChange(w_hat))
+	// {
+	// 	if (CommandRotationToStop(rotation))
+	// 	{
+	// 		old_dir = (old_dir == RotationDirection::CCW) ? RotationDirection::CW : RotationDirection::CCW;
+	// 	}
+	// }
+	// // If direction has not changed keep sending the setpoints which in turn will determine the table value (rotation dir).
+	// else
+	// {
+	// 	UpdateRotationDirection(w_hat, rotation);
+	// 	rotation->MoveMotor();
+	// }
+	// insertion->MoveMotor();
 
-	double du1 = insertion->GetEncoderPositionUnit() - insertion_old;
-	double du2 = rotation->GetEncoderPositionUnit() - rotation_old;
-	// Update the bicycle kinematic
-	UpdateNeedleTipPositionBicycleKinematic(du1, du2);
+	// double du1 = insertion->GetEncoderPositionUnit() - insertion_old;
+	// double du2 = rotation->GetEncoderPositionUnit() - rotation_old;
+	// // Update the bicycle kinematic
+	// UpdateNeedleTipPositionBicycleKinematic(du1, du2);
 }
 
 bool ProstateRobotClinicalMode::CheckDirectionChange(const double &commanded_w_hat)
 {
-	if ((commanded_w_hat < 0 && old_dir == RotationDirection::CW) || (commanded_w_hat > 0 && old_dir == RotationDirection::CCW))
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+	// if ((commanded_w_hat < 0 && old_dir == RotationDirection::CW) || (commanded_w_hat > 0 && old_dir == RotationDirection::CCW))
+	// {
+	// 	return true;
+	// }
+	// else
+	// {
+	// 	return false;
+	// }
 }
 
-bool ProstateRobotClinicalMode::CommandRotationToStop(Motor *rotation)
-{
-	// Send 5 consecutive stop commands to the motor
-	// TODO: Charles will enable direction change detection on the card
-	if (stop_counter < 10)
-	{
-		stop_counter++;
-	}
-	else
-	{
-		stop_counter = 0;
-		return true;
-	}
-	rotation->StopMotor();
-	return false;
-}
+// bool ProstateRobotClinicalMode::CommandRotationToStop(Motor *rotation)
+// {
+// 	// Send 5 consecutive stop commands to the motor
+// 	// TODO: Charles will enable direction change detection on the card
+// 	if (stop_counter < 10)
+// 	{
+// 		stop_counter++;
+// 	}
+// 	else
+// 	{
+// 		stop_counter = 0;
+// 		return true;
+// 	}
+// 	rotation->StopMotor();
+// 	return false;
+// }
 
-void ProstateRobotClinicalMode::UpdateRotationDirection(const double &commanded_w_hat, Motor *rotation)
-{
-	if (commanded_w_hat < 0)
-	{
-		rotation->_setpoint = -1e6;
-		old_dir = RotationDirection::CCW;
-	}
-	else
-	{
-		rotation->_setpoint = 1e6;
-		old_dir = RotationDirection::CW;
-	}
-}
+void ProstateRobotClinicalMode::UpdateRotationDirection(){}
+
+// void ProstateRobotClinicalMode::UpdateRotationDirection(const double &commanded_w_hat, Motor *rotation)
+// {
+// 	if (commanded_w_hat < 0)
+// 	{
+// 		rotation->_setpoint = -1e6;
+// 		old_dir = RotationDirection::CCW;
+// 	}
+// 	else
+// 	{
+// 		rotation->_setpoint = 1e6;
+// 		old_dir = RotationDirection::CW;
+// 	}
+// }
 
 int ProstateRobotClinicalMode::CalcVelocityFreq(const double &des_vel_rpm)
 {
@@ -214,7 +218,7 @@ void ProstateRobotClinicalMode::UpdateNeedleTipPositionBicycleKinematic(const do
 	{
 		return;
 	}
-	SetBaseToTreatmentRobotCoordKinematic(bicycle_kinematics.ForwardKinematicsBicycleModel(GetBaseToTreatmentRobotCoordKinematic(), du1, du2));
+	// SetBaseToTreatmentRobotCoordKinematic(bicycle_kinematics.ForwardKinematicsBicycleModel(GetBaseToTreatmentRobotCoordKinematic(), du1, du2));
 }
 
 void ProstateRobotClinicalMode::MoveMotorsTargeting()
@@ -227,60 +231,60 @@ void ProstateRobotClinicalMode::MoveMotorsTargeting()
 
 void ProstateRobotClinicalMode::MoveOneMotorTargeting(int motor_id)
 {
-	if (motor_id == 0)
-	{
-		motion_ctrl->MoveMotor(ProstateRobotMotor::BACK_LEFT);
-		Motor *motor = motion_ctrl->motors->GetMotor(ProstateRobotMotor::FRONT_LEFT);
+	// if (motor_id == 0)
+	// {
+	// 	motion_ctrl->MoveMotor(ProstateRobotMotor::BACK_LEFT);
+	// 	Motor *motor = motion_ctrl->motors->GetMotor(ProstateRobotMotor::FRONT_LEFT);
 
-		Logger &log = Logger::GetInstance();
-		log.Log("Setpoint List Length: " + to_string(motor->_setpointList.size()), logger::INFO, true);
-		log.Log("Setpoint List: ", logger::INFO, true);
-		for (auto it = motor->_setpointList.front(); it != motor->_setpointList.back(); it++)
-		{
-			log.Log(to_string(it), logger::INFO, true);
-		}
-	}
-	else if (motor_id == 1)
-	{
-		motion_ctrl->MoveMotor(ProstateRobotMotor::BACK_RIGHT);
-	}
-	else if (motor_id == 2)
-	{
-		motion_ctrl->MoveMotor(ProstateRobotMotor::FRONT_LEFT);
-	}
-	else if (motor_id == 3)
-	{
-		motion_ctrl->MoveMotor(ProstateRobotMotor::FRONT_RIGHT);
-	}
+	// 	Logger &log = Logger::GetInstance();
+	// 	log.Log("Setpoint List Length: " + to_string(motor->_setpointList.size()), logger::INFO, true);
+	// 	log.Log("Setpoint List: ", logger::INFO, true);
+	// 	for (auto it = motor->_setpointList.front(); it != motor->_setpointList.back(); it++)
+	// 	{
+	// 		log.Log(to_string(it), logger::INFO, true);
+	// 	}
+	// }
+	// else if (motor_id == 1)
+	// {
+	// 	motion_ctrl->MoveMotor(ProstateRobotMotor::BACK_RIGHT);
+	// }
+	// else if (motor_id == 2)
+	// {
+	// 	motion_ctrl->MoveMotor(ProstateRobotMotor::FRONT_LEFT);
+	// }
+	// else if (motor_id == 3)
+	// {
+	// 	motion_ctrl->MoveMotor(ProstateRobotMotor::FRONT_RIGHT);
+	// }
 }
 
 void ProstateRobotClinicalMode::RetractNeedle()
 {
-	Motor *insertion = motion_ctrl->motors->GetMotor(ProstateRobotMotor::INSERTION);
-	motion_ctrl->MoveMotor(ProstateRobotMotor::INSERTION);
-	if (insertion->IsLimit())
-	{
-		retracting_needle = false;
-		insertion->StopMotor();
-		insertion->DisableMotor();
-	}
-	double insertion_old = insertion->GetEncoderLastPositionUnit();
-	double du1 = insertion->GetEncoderPositionUnit() - insertion_old;
-	// Update the bicycle kinematic
-	UpdateNeedleTipPositionBicycleKinematic(du1, 0);
+	// Motor *insertion = motion_ctrl->motors->GetMotor(ProstateRobotMotor::INSERTION);
+	// motion_ctrl->MoveMotor(ProstateRobotMotor::INSERTION);
+	// if (insertion->IsLimit())
+	// {
+	// 	retracting_needle = false;
+	// 	insertion->StopMotor();
+	// 	insertion->DisableMotor();
+	// }
+	// double insertion_old = insertion->GetEncoderLastPositionUnit();
+	// double du1 = insertion->GetEncoderPositionUnit() - insertion_old;
+	// // Update the bicycle kinematic
+	// UpdateNeedleTipPositionBicycleKinematic(du1, 0);
 }
 
 void ProstateRobotClinicalMode::PrepareNeedleRetract()
 {
-	// Disable all motors
-	motion_ctrl->DisableAllMotors();
-	// Enable insertion motor and retract until it hits the limit.
-	Motor *insertion_motor = motion_ctrl->motors->GetMotor(ProstateRobotMotor::INSERTION);
-	insertion_motor->_enabled = true;
-	insertion_motor->_homing = true;
-	insertion_motor->_setpoint = insertion_motor->_homeOffsetInTicks;
-	// Enable tool retract flag
-	retracting_needle = true;
+	// // Disable all motors
+	// motion_ctrl->DisableAllMotors();
+	// // Enable insertion motor and retract until it hits the limit.
+	// Motor *insertion_motor = motion_ctrl->motors->GetMotor(ProstateRobotMotor::INSERTION);
+	// insertion_motor->_enabled = true;
+	// insertion_motor->_homing = true;
+	// insertion_motor->_setpoint = insertion_motor->_homeOffsetInTicks;
+	// // Enable tool retract flag
+	// retracting_needle = true;
 }
 
 void ProstateRobotClinicalMode::UpdateCurvParams(const Eigen::Matrix<double, 4, 1, Eigen::DontAlign> &target_vector)
@@ -290,8 +294,8 @@ void ProstateRobotClinicalMode::UpdateCurvParams(const Eigen::Matrix<double, 4, 
 
 double ProstateRobotClinicalMode::GetRotationMotorPositionUnit()
 {
-	Motor *rotation = motion_ctrl->motors->GetMotor(ProstateRobotMotor::ROTATION);
-	return rotation->GetEncoderPositionUnit();
+	// Motor *rotation = motion_ctrl->motors->GetMotor(ProstateRobotMotor::ROTATION);
+	// return rotation->GetEncoderPositionUnit();
 }
 
 void ProstateRobotClinicalMode::PushBackActualNeedlePosAndUpdatePose(const Eigen::Matrix<double, 3, 1, Eigen::DontAlign> &reported_tip_pos)
@@ -300,43 +304,43 @@ void ProstateRobotClinicalMode::PushBackActualNeedlePosAndUpdatePose(const Eigen
 	// Convert reported tip position from the robot base frame to needle guide frame
 	// Eigen::Matrix<double, 4, 1, Eigen::DontAlign> reported_tip_pos_needle_guide_coord = kinematics_ctrl->GetNeedleGuidePoseRobotCoord().inverse() * Eigen::Matrix<double, 4, 1, Eigen::DontAlign>(reported_tip_pos(0), reported_tip_pos(1), reported_tip_pos(2), 1);
 	// Push back the reported tip position
-	actual_tip_positions.push_back(reported_tip_pos);
-	try
-	{
-		// estimate rotation angle about
-		polyfit::EstimatedAngleOutput estimated_angle = poly_fit.CalcAngle(actual_tip_positions);
-		// Log estimated rotation angles about the needle base for the needle tip pose
-		string ss{"Alpha,  " + to_string(estimated_angle.alpha * 180 / M_PI) + " degrees."};
-		log.Log(ss, logger::INFO, true);
-		ss.clear();
-		ss = "Beta,  " + to_string(estimated_angle.beta * 180 / M_PI) + " degrees.";
-		log.Log(ss, logger::INFO, true);
-		ss = "Theta,  " + to_string(GetRotationMotorPositionUnit() * 180 / M_PI) + " degrees.";
-		log.Log(ss, logger::INFO, true);
-		// Update the current pose based on the estimated pose
-		// Orientation Component
-		std::cout << "Needle Pose before rbt coord: \n"
-				  << GetBaseToTreatmentRobotCoordKinematic() << std::endl;
+	// actual_tip_positions.push_back(reported_tip_pos);
+	// try
+	// {
+	// 	// estimate rotation angle about
+	// 	polyfit::EstimatedAngleOutput estimated_angle = poly_fit.CalcAngle(actual_tip_positions);
+	// 	// Log estimated rotation angles about the needle base for the needle tip pose
+	// 	string ss{"Alpha,  " + to_string(estimated_angle.alpha * 180 / M_PI) + " degrees."};
+	// 	log.Log(ss, logger::INFO, true);
+	// 	ss.clear();
+	// 	ss = "Beta,  " + to_string(estimated_angle.beta * 180 / M_PI) + " degrees.";
+	// 	log.Log(ss, logger::INFO, true);
+	// 	ss = "Theta,  " + to_string(GetRotationMotorPositionUnit() * 180 / M_PI) + " degrees.";
+	// 	log.Log(ss, logger::INFO, true);
+	// 	// Update the current pose based on the estimated pose
+	// 	// Orientation Component
+	// 	std::cout << "Needle Pose before rbt coord: \n"
+	// 			  << GetBaseToTreatmentRobotCoordKinematic() << std::endl;
 
-		Eigen::Matrix<double, 4, 4, Eigen::DontAlign> new_base_to_treatment_rbt_coord;
-		new_base_to_treatment_rbt_coord.setIdentity();
+	// 	Eigen::Matrix<double, 4, 4, Eigen::DontAlign> new_base_to_treatment_rbt_coord;
+	// 	new_base_to_treatment_rbt_coord.setIdentity();
 
-		new_base_to_treatment_rbt_coord = bicycle_kinematics.ApplyRotationFixedAngles(new_base_to_treatment_rbt_coord, Eigen::Matrix<double, 3, 1, Eigen::DontAlign>(estimated_angle.beta, estimated_angle.alpha, GetRotationMotorPositionUnit()));
-		// Position Component
-		new_base_to_treatment_rbt_coord(0, 3) = reported_tip_pos(0);
-		new_base_to_treatment_rbt_coord(1, 3) = reported_tip_pos(1);
-		new_base_to_treatment_rbt_coord(2, 3) = reported_tip_pos(2);
-		SetBaseToTreatmentRobotCoordKinematic(new_base_to_treatment_rbt_coord);
-		std::cout << "Needle Pose after rbt coord: \n"
-				  << GetBaseToTreatmentRobotCoordKinematic() << std::endl;
-	}
-	catch (const std::exception &e)
-	{
-		// Log the error
-		Logger &log = Logger::GetInstance();
-		std::string log_msg{e.what()};
-		log.Log(log_msg, logger::ERROR, true);
-	}
+	// 	new_base_to_treatment_rbt_coord = bicycle_kinematics.ApplyRotationFixedAngles(new_base_to_treatment_rbt_coord, Eigen::Matrix<double, 3, 1, Eigen::DontAlign>(estimated_angle.beta, estimated_angle.alpha, GetRotationMotorPositionUnit()));
+	// 	// Position Component
+	// 	new_base_to_treatment_rbt_coord(0, 3) = reported_tip_pos(0);
+	// 	new_base_to_treatment_rbt_coord(1, 3) = reported_tip_pos(1);
+	// 	new_base_to_treatment_rbt_coord(2, 3) = reported_tip_pos(2);
+	// 	SetBaseToTreatmentRobotCoordKinematic(new_base_to_treatment_rbt_coord);
+	// 	std::cout << "Needle Pose after rbt coord: \n"
+	// 			  << GetBaseToTreatmentRobotCoordKinematic() << std::endl;
+	// }
+	// catch (const std::exception &e)
+	// {
+	// 	// Log the error
+	// 	Logger &log = Logger::GetInstance();
+	// 	std::string log_msg{e.what()};
+	// 	log.Log(log_msg, logger::ERROR, true);
+	// }
 }
 
 /*
@@ -373,57 +377,57 @@ void ProstateRobotClinicalMode::UpdateCurvParamsAndInsertionLength()
 
 void ProstateRobotClinicalMode::UpdateInsertionLength()
 {
-	Motor *insertion = motion_ctrl->motors->GetMotor(ProstateRobotMotor::INSERTION);
-	double total_insertion_setpoint_mm = insertion->GetSetPointInPositionUnit();
-	double insertion_diff_mm = curv_steering->CalcInsertionLengthDiff(insertion->GetEncoderPositionUnit(), total_insertion_setpoint_mm);
-	double updated_total_insertion_mm = total_insertion_setpoint_mm + insertion_diff_mm;
-	insertion->_setpoint = insertion->ConvertPositionUnitToTicks(updated_total_insertion_mm);
+	// Motor *insertion = motion_ctrl->motors->GetMotor(ProstateRobotMotor::INSERTION);
+	// double total_insertion_setpoint_mm = insertion->GetSetPointInPositionUnit();
+	// double insertion_diff_mm = curv_steering->CalcInsertionLengthDiff(insertion->GetEncoderPositionUnit(), total_insertion_setpoint_mm);
+	// double updated_total_insertion_mm = total_insertion_setpoint_mm + insertion_diff_mm;
+	// insertion->_setpoint = insertion->ConvertPositionUnitToTicks(updated_total_insertion_mm);
 }
 
 bool ProstateRobotClinicalMode::isInTargetingPos(double orientation_tol, double pos_tol)
 {
-	// Get the motors
-	Motor *front_left = motion_ctrl->motors->GetMotor(ProstateRobotMotor::FRONT_LEFT);
-	Motor *front_right = motion_ctrl->motors->GetMotor(ProstateRobotMotor::FRONT_RIGHT);
-	Motor *back_left = motion_ctrl->motors->GetMotor(ProstateRobotMotor::BACK_LEFT);
-	Motor *back_right = motion_ctrl->motors->GetMotor(ProstateRobotMotor::BACK_RIGHT);
+	// // Get the motors
+	// Motor *front_left = motion_ctrl->motors->GetMotor(ProstateRobotMotor::FRONT_LEFT);
+	// Motor *front_right = motion_ctrl->motors->GetMotor(ProstateRobotMotor::FRONT_RIGHT);
+	// Motor *back_left = motion_ctrl->motors->GetMotor(ProstateRobotMotor::BACK_LEFT);
+	// Motor *back_right = motion_ctrl->motors->GetMotor(ProstateRobotMotor::BACK_RIGHT);
 
-	//  Check if all four legs are at their setpoint
-	if (front_left->IsMotorWithinSetpointBounds() && front_right->IsMotorWithinSetpointBounds() && back_left->IsMotorWithinSetpointBounds() && back_right->IsMotorWithinSetpointBounds())
-	{
-		return true;
-	}
+	// //  Check if all four legs are at their setpoint
+	// if (front_left->IsMotorWithinSetpointBounds() && front_right->IsMotorWithinSetpointBounds() && back_left->IsMotorWithinSetpointBounds() && back_right->IsMotorWithinSetpointBounds())
+	// {
+	// 	return true;
+	// }
 
-	// The robot has reached the targeting position
-	return false;
+	// // The robot has reached the targeting position
+	// return false;
 }
 
 bool ProstateRobotClinicalMode::IsSetpointListEmpty(int motor_id)
 {
-	Motor *motor = motion_ctrl->motors->GetMotor(ProstateRobotMotor::FRONT_LEFT);
-	if (motor_id == 0)
-	{
-		Motor *motor = motion_ctrl->motors->GetMotor(ProstateRobotMotor::FRONT_LEFT);
-	}
-	else if (motor_id ==1)
-	{
-		Motor *motor = motion_ctrl->motors->GetMotor(ProstateRobotMotor::FRONT_RIGHT);
-	}
-	else if (motor_id == 2)
-	{
-		Motor *motor = motion_ctrl->motors->GetMotor(ProstateRobotMotor::BACK_LEFT);
-	}
-	else if (motor_id == 3)
-	{
-		Motor *motor = motion_ctrl->motors->GetMotor(ProstateRobotMotor::BACK_RIGHT);
-	}
-	// log length of setpoint list
-	Logger &log = Logger::GetInstance();
-	log.Log("Setpoint List Length: " + to_string(motor->_setpointList.size()), logger::INFO, true);
-	if (motor->_setpointList.empty())
-	{
-		return true;
-	}
+	// Motor *motor = motion_ctrl->motors->GetMotor(ProstateRobotMotor::FRONT_LEFT);
+	// if (motor_id == 0)
+	// {
+	// 	Motor *motor = motion_ctrl->motors->GetMotor(ProstateRobotMotor::FRONT_LEFT);
+	// }
+	// else if (motor_id ==1)
+	// {
+	// 	Motor *motor = motion_ctrl->motors->GetMotor(ProstateRobotMotor::FRONT_RIGHT);
+	// }
+	// else if (motor_id == 2)
+	// {
+	// 	Motor *motor = motion_ctrl->motors->GetMotor(ProstateRobotMotor::BACK_LEFT);
+	// }
+	// else if (motor_id == 3)
+	// {
+	// 	Motor *motor = motion_ctrl->motors->GetMotor(ProstateRobotMotor::BACK_RIGHT);
+	// }
+	// // log length of setpoint list
+	// Logger &log = Logger::GetInstance();
+	// log.Log("Setpoint List Length: " + to_string(motor->_setpointList.size()), logger::INFO, true);
+	// if (motor->_setpointList.empty())
+	// {
+	// 	return true;
+	// }
 	return false;
 }
 
@@ -435,8 +439,8 @@ bool ProstateRobotClinicalMode::hasReachedTarget(double epsilon)
 
 bool ProstateRobotClinicalMode::isNeedleAtHome()
 {
-	Motor *insertion = motion_ctrl->motors->GetMotor(ProstateRobotMotor::INSERTION);
-	return insertion->IsLimit();
+	// Motor *insertion = motion_ctrl->motors->GetMotor(ProstateRobotMotor::INSERTION);
+	// return insertion->IsLimit();
 }
 
 int ProstateRobotClinicalMode::LinearInterpolation(double des_rpm, const vector<double> &rpm_data, const vector<int> &freq_data)
@@ -493,10 +497,12 @@ double ProstateRobotClinicalMode::CalcVelocityRpm(const double &w_hat)
 	return (w_hat * max_rotation_speed_rpm);
 }
 
-double ProstateRobotClinicalMode::ConvertMotorTicksPerSecToRpm(Motor *motor)
-{
-	return motor->GetEncoderVelocity() * (60 / (motor->_ticksPerUnit * 2 * M_PI)); // Get RPM velocity ;
-}
+double ProstateRobotClinicalMode::ConvertMotorTicksPerSecToRpm(){}
+
+// double ProstateRobotClinicalMode::ConvertMotorTicksPerSecToRpm(Motor *motor)
+// {
+// 	return motor->GetEncoderVelocity() * (60 / (motor->_ticksPerUnit * 2 * M_PI)); // Get RPM velocity ;
+// }
 
 /*======================================================*/
 // ==================== Legacy Code ====================

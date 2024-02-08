@@ -18,10 +18,10 @@ ProstateRobotManualMode::ProstateRobotManualMode(ProstateRobotMotionController *
 	// velocity_controller.SetVelSetpoint(des_vel_);
 
 	// Set the desired open-loop velocity to the motor
-	Motor *rotation = motion_ctrl->motors->GetMotor(ProstateRobotMotor::ROTATION);
-	rotation->_velocity_controller.SetVelSetpoint(des_vel_);
-	double des_freq = LinearInterpolation(des_vel_, rpm_positive_dir, frequency_positive_dir);
-	rotation->_velocity = des_freq;
+	// Motor *rotation = motion_ctrl->motors->GetMotor(ProstateRobotMotor::ROTATION);
+	// rotation->_velocity_controller.SetVelSetpoint(des_vel_);
+	// double des_freq = LinearInterpolation(des_vel_, rpm_positive_dir, frequency_positive_dir);
+	// rotation->_velocity = des_freq;
 	timer.tic();
 }
 
@@ -30,9 +30,9 @@ void ProstateRobotManualMode::Run(const string &current_state)
 	// Move motors to their setpoints
 	if (IsFootPedalPressed())
 	{
-		Motor *rotation = motion_ctrl->motors->GetMotor(ProstateRobotMotor::ROTATION);
-		rotation->_velocity = LinearInterpolation(des_vel_, rpm_positive_dir, frequency_positive_dir);
-		motion_ctrl->MoveAllMotors();
+		// Motor *rotation = motion_ctrl->motors->GetMotor(ProstateRobotMotor::ROTATION);
+		// rotation->_velocity = LinearInterpolation(des_vel_, rpm_positive_dir, frequency_positive_dir);
+		// motion_ctrl->MoveAllMotors();
 	}
 	// If the foot pedal is not pressed
 	else
@@ -43,10 +43,10 @@ void ProstateRobotManualMode::Run(const string &current_state)
 	}
 }
 
-double ProstateRobotManualMode::ConvertMotorTicksPerSecToRpm(Motor *motor)
-{
-	return motor->GetEncoderVelocity() * (60 / (motor->_ticksPerUnit * 2 * M_PI)); // Get RPM velocity ;
-}
+// double ProstateRobotManualMode::ConvertMotorTicksPerSecToRpm(Motor *motor)
+// {
+// 	return motor->GetEncoderVelocity() * (60 / (motor->_ticksPerUnit * 2 * M_PI)); // Get RPM velocity ;
+// }
 
 int ProstateRobotManualMode::LinearInterpolation(double des_rpm, const vector<double> &rpm_data, const vector<int> &freq_data)
 {
@@ -90,10 +90,10 @@ void ProstateRobotManualMode::ClosedLoopControl()
 {
 	timer.toc();
 	double elapsed_time_sec = timer.ConvertMicrosecToSec(timer.time());
-	Motor *rotation = motion_ctrl->motors->GetMotor(ProstateRobotMotor::ROTATION);
-	double control_output_rpm = rotation->_velocity_controller.CalculateVelInputCommand(ConvertMotorTicksPerSecToRpm(rotation), elapsed_time_sec);
-	int commanded_vel = LinearInterpolation(control_output_rpm, rpm_positive_dir, frequency_positive_dir);
-	rotation->_velocity = commanded_vel;
-	motion_ctrl->MoveAllMotors();
+	// Motor *rotation = motion_ctrl->motors->GetMotor(ProstateRobotMotor::ROTATION);
+	// double control_output_rpm = rotation->_velocity_controller.CalculateVelInputCommand(ConvertMotorTicksPerSecToRpm(rotation), elapsed_time_sec);
+	// int commanded_vel = LinearInterpolation(control_output_rpm, rpm_positive_dir, frequency_positive_dir);
+	// rotation->_velocity = commanded_vel;
+	// motion_ctrl->MoveAllMotors();
 	timer.tic();
 }

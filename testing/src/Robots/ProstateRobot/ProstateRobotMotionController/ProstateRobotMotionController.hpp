@@ -7,9 +7,10 @@ class ProstateRobotMotionController
 {
 public:
     // Constructor
-    ProstateRobotMotionController(ProstateRobotMotors *);
+    ProstateRobotMotionController();
+    // ProstateRobotMotionController(ProstateRobotMotors *);
     // Functions
-    FPGA_Utilities *fpga_utils;
+    // FPGA_Utilities *fpga_utils;
     ProstateRobotMotors *motors;
     
     bool Spin();

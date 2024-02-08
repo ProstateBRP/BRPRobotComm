@@ -7,7 +7,8 @@
 class ProstateRobotKinematicsController
 {
 public:
-    ProstateRobotKinematicsController(ProstateRobotMotors *, ProstateKinematics *);
+    ProstateRobotKinematicsController();
+    // ProstateRobotKinematicsController(ProstateRobotMotors *, ProstateKinematics *);
     ProstateRobotMotorSetpointMap AxisSetpointValidator();
     ProstateRobotMotorSetpointMap AxisSetpointValidator(ProstateRobotMotorSetpointMap &);
     ProstateRobotMotorSetpointMap CalculateKinematicallyValidSetpoints(const Eigen::Matrix<double, 4, 4, Eigen::DontAlign> &);
@@ -15,7 +16,7 @@ public:
 
 private:
     ProstateRobotMotors *motors{nullptr};
-    ProstateKinematics *kinematics;
+    // ProstateKinematics *kinematics;
     float allowed_axial_separation_mm{308}; // Maximum allowable leg separation distance
     float max_allowed_yaw_angle_deg{10};    // Maximum allowable alpha angle
     float min_allowed_yaw_angle_deg{-10};   // Minimum allowable alpha angle

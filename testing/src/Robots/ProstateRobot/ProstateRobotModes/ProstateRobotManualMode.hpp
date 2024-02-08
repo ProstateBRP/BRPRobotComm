@@ -8,7 +8,7 @@ class ProstateRobotManualMode : public ProstateRobotModeBase
 public:
     ProstateRobotManualMode(ProstateRobotMotionController *);
     virtual void Run(const string &current_state = "");
-    double ConvertMotorTicksPerSecToRpm(Motor *);
+    // double ConvertMotorTicksPerSecToRpm(Motor *);
     int LinearInterpolation(double des_rpm, const vector<double> &, const vector<int> &);
     void ClosedLoopControl();
 

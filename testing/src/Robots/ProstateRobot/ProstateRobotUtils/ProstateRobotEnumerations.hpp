@@ -4,7 +4,7 @@
 #include <string>
 #include <map>
 
-#include "Motor.hpp"
+// #include "Motor.hpp"
 
 enum class ProstateRobotMotor : int
 {
@@ -100,6 +100,6 @@ struct ProstateRobotMessageBody
 
 // Typedefs
 typedef std::map<ProstateRobotMotor, int> ProstateRobotMotorSetpointMap;
-typedef std::map<ProstateRobotMotor, Motor *> ProstateRobotMotorMapPtr;
+// typedef std::map<ProstateRobotMotor, Motor *> ProstateRobotMotorMapPtr;
 
 #endif //_ProstateRobotEnumeration_HPP_

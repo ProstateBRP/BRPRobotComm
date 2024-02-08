@@ -6,7 +6,7 @@ ProstateRobotModeBase::ProstateRobotModeBase(ProstateRobotMotionController *moti
 
 bool ProstateRobotModeBase::IsFootPedalPressed()
 {
-	return motion_ctrl->fpga_utils->IsFootPedalPressed();
+	// return motion_ctrl->fpga_utils->IsFootPedalPressed();
 }
 
 /* Update Motor Stall Detect */
