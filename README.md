@@ -15,3 +15,19 @@ Change directories of `EIGEN_DIR`, `IGTL_DIR`, `BOOST_DIR`, `SURGICAL_ROBOT_SOUR
 `PROSTATE_COMM_SOURCE_DIR`: Path of this repo.
 
 May also need to change Line 3 in `testing/src/Communication/OpenIGTLink/CMakeLists.txt` to your OpenIGTLink build path.
+
+
+## Build 
+
+~~~
+cd testing
+mkdir build
+cd build
+cmake ../src
+make
+~~~
+
+## Run
+
+`./CommModuleTest ProstateRobot`
+
