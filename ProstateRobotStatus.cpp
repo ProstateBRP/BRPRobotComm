@@ -147,33 +147,33 @@ void ProstateRobotStatus::RetractNeedleToHome()
 void ProstateRobotStatus::SetCurvMethod(const string &ss)
 {
   Logger &log = Logger::GetInstance();
-  if (ss == string("UNIDIRECTIONAL"))
-  {
-    robot->clinical_mode->SetCurvMethod(CurvMethod::UNIDIRECTIONAL);
-    robot->active_steering_mode->SetCurvMethod(CurvMethod::UNIDIRECTIONAL);  
-    log.Log("Changed Curv Mode to UNIDIRECTIONAL", logger::INFO, true);
-  }
-  else if (ss == string("BIDIRECTIONAL"))
-  {
-    robot->clinical_mode->SetCurvMethod(CurvMethod::BIDIRECTIONAL);
-    robot->active_steering_mode->SetCurvMethod(CurvMethod::BIDIRECTIONAL);
-    log.Log("Changed Curv Mode to BIDIRECTIONAL", logger::INFO, true);
-  }
-  else
-  {
-    throw std::invalid_argument(ss + " is Undefined Mode!");
-  }
+  // if (ss == string("UNIDIRECTIONAL"))
+  // {
+  //   robot->clinical_mode->SetCurvMethod(CurvMethod::UNIDIRECTIONAL);
+  //   robot->active_steering_mode->SetCurvMethod(CurvMethod::UNIDIRECTIONAL);  
+  //   log.Log("Changed Curv Mode to UNIDIRECTIONAL", logger::INFO, true);
+  // }
+  // else if (ss == string("BIDIRECTIONAL"))
+  // {
+  //   robot->clinical_mode->SetCurvMethod(CurvMethod::BIDIRECTIONAL);
+  //   robot->active_steering_mode->SetCurvMethod(CurvMethod::BIDIRECTIONAL);
+  //   log.Log("Changed Curv Mode to BIDIRECTIONAL", logger::INFO, true);
+  // }
+  // else
+  // {
+  //   throw std::invalid_argument(ss + " is Undefined Mode!");
+  // }
 }
 void ProstateRobotStatus::SetAlpha(const double &alpha)
 {
-  try
-  {
-    robot->active_steering_mode->SetAlpha(alpha);
-  }
-  catch (...)
-  {
-    std::cerr << "Active Steering Mode Does not Exist!" << std::endl;
-  }
+  // try
+  // {
+  //   robot->active_steering_mode->SetAlpha(alpha);
+  // }
+  // catch (...)
+  // {
+  //   std::cerr << "Active Steering Mode Does not Exist!" << std::endl;
+  // }
 
   Logger &log = Logger::GetInstance();
   string log_msg = "Changed ALPHA value to: " + to_string(alpha) + ".";
@@ -213,30 +213,30 @@ void ProstateRobotStatus::PushBackActualNeedlePos(const igtl::Matrix4x4 &matrix)
   Eigen::Matrix<double, 4, 4, Eigen::DontAlign> reported_needle_tip_robot_coord = robot->ConvertFromImagerToRobotBase(reported_needle_pos_image_coord);
   Eigen::Matrix<double, 3, 1, Eigen::DontAlign> needle_tip_pos(reported_needle_tip_robot_coord(0, 3), reported_needle_tip_robot_coord(1, 3),
                                                                reported_needle_tip_robot_coord(2, 3));
-  // If the pose estimation is successful the curv params will be updated.
-  if (this->robot->clinical_mode->PushBackActualNeedlePosAndUpdatePose(needle_tip_pos))
-  {
-    this->robot->clinical_mode->UpdateCurvParamsAndInsertionLength();
-  }
+  // // If the pose estimation is successful the curv params will be updated.
+  // if (this->robot->clinical_mode->PushBackActualNeedlePosAndUpdatePose(needle_tip_pos))
+  // {
+  //   this->robot->clinical_mode->UpdateCurvParamsAndInsertionLength();
+  // }
 }
 
 void ProstateRobotStatus::SetDeadband(const int val)
 {
-  robot->clinical_mode->SetDeadband(val);
+  // robot->clinical_mode->SetDeadband(val);
 }
 
 void ProstateRobotStatus::SetSteeringMethod(const std::string &steering_type)
 {
   if (steering_type == "CURV")
   {
-    robot->clinical_mode->SetSteeringType(SteeringType::CURV);
+    // robot->clinical_mode->SetSteeringType(SteeringType::CURV);
     Logger &log = Logger::GetInstance();
     string log_msg = "Changed Steering type to: " + steering_type + ".";
     log.Log(log_msg, logger::INFO, true);
   }
   else if (steering_type == "FLIPPED")
   {
-    robot->clinical_mode->SetSteeringType(SteeringType::FLIPPED);
+    // robot->clinical_mode->SetSteeringType(SteeringType::FLIPPED);
     Logger &log = Logger::GetInstance();
     string log_msg = "Changed Steering type to: " + steering_type + ".";
     log.Log(log_msg, logger::INFO, true);

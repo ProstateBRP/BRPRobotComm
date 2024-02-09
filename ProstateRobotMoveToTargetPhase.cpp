@@ -132,8 +132,8 @@ int ProstateRobotMoveToTargetPhase::MessageHandler(igtl::MessageHeader *headerMs
 
       log.Log("OpenIGTLink Target Point Validated and CURV Parameters Updated!", devName.substr(4, std::string::npos),
               logger::INFO, true);
-      std::string log_contents = "Alpha Set To: " + std::to_string(robot->clinical_mode->GetAlpha()) + ", Target Location: " + std::to_string(robot->clinical_mode->GetTargetAngle() * 180/M_PI) + " degrees.";
-      log.Log(log_contents, devName.substr(4, std::string::npos), logger::INFO, true);
+      // std::string log_contents = "Alpha Set To: " + std::to_string(robot->clinical_mode->GetAlpha()) + ", Target Location: " + std::to_string(robot->clinical_mode->GetTargetAngle() * 180/M_PI) + " degrees.";
+      // log.Log(log_contents, devName.substr(4, std::string::npos), logger::INFO, true);
 
       return 1;
     }

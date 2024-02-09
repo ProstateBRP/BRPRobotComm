@@ -11,9 +11,6 @@
 
 #include <string>
 
-#include "Packets.hpp"
-#include "FPGA_Utilities.hpp"
-#include "ForceSensor.hpp"
 #include "ProstateKinematics.hpp"
 #include "ProstateRobotMotors.hpp"
 #include "ProstateRobotSensors.hpp"
@@ -32,13 +29,10 @@ class ProstateRobot : public Robot
 {
 public:
 	//================ Constructor ================
-	ProstateRobot(Packets *packets, FPGA_Utilities *fpga_util, int loopRate);
+	ProstateRobot(unsigned int loopRate);
+	// ProstateRobot(Packets *packets, FPGA_Utilities *fpga_util, int loopRate);
 	~ProstateRobot();
 	//================ Parameters =================
-	// Outgoing and Incoming Packets via SPI
-	Packets *_packets;
-	// The FPGA Utility object was included to allow for control over LEDs
-	FPGA_Utilities *_fpga_util;
 	// Timer
 	Timer _timer;
 	int _loopRate;
@@ -51,7 +45,7 @@ public:
 	ProstateKinematics prostate_kinematics_;
 	BiopsyNeedle biopsy_needle; // Defines the specific needle structure on the robot
 	ProstateRobotMotors motors_;
-	std::queue<Motor*> motors_queue;
+	// std::queue<Motor*> motors_queue;
 	ProstateRobotSensors sensors_;
 	ProstateRobotMotionController motion_controller_;
 	ProstateRobotKinematicsController kinematics_controller_;
@@ -85,8 +79,8 @@ public:
 	virtual void Update();
 	virtual void UpdateBaseToTarget();
 	virtual void ZeroRobot();
-	virtual Motor *GetMotor(int cardID);
-	virtual vector<Motor *> ListMotors();
+	// virtual Motor *GetMotor(int cardID);
+	// virtual vector<Motor *> ListMotors();
 	virtual Eigen::Matrix<double, 3, 1, Eigen::DontAlign> GetTargetPointPosVectorImageCoord();
 	virtual Eigen::Matrix<double, 4, 4, Eigen::DontAlign> ConvertFromImagerToRobotBase(const Eigen::Matrix<double, 4, 4, Eigen::DontAlign> &);
 	virtual Eigen::Matrix<double, 4, 4, Eigen::DontAlign> ConvertFromRobotBaseToImager(const Eigen::Matrix<double, 4, 4, Eigen::DontAlign> &);

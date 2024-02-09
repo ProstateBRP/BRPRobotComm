@@ -148,21 +148,21 @@ int ProstateRobotPhaseBase::CheckCommonMessage(igtl::MessageHeader *headerMsg)
       return 1;
     }
     
-    else if (strcmp(headerMsg->GetDeviceName(), kMsgBody.SET_DEADBAND.c_str()) == 0)
-    {
-      try
-      {
-        int deadband = std::stoi(string_msg_content);
-        RStatus->SetDeadband(deadband);
-        Logger &log = Logger::GetInstance();
-        log.Log("Deadband of " + string_msg_content + " was received and set in the code.", logger::INFO, true);
-      }
-      catch(const std::invalid_argument &e)
-      {
-        std::cerr << "Bad deadband value. Message ignored!" << std::endl;
-      }
-      return 1;
-    }
+    // else if (strcmp(headerMsg->GetDeviceName(), kMsgBody.SET_DEADBAND.c_str()) == 0)
+    // {
+    //   try
+    //   {
+    //     int deadband = std::stoi(string_msg_content);
+    //     RStatus->SetDeadband(deadband);
+    //     Logger &log = Logger::GetInstance();
+    //     log.Log("Deadband of " + string_msg_content + " was received and set in the code.", logger::INFO, true);
+    //   }
+    //   catch(const std::invalid_argument &e)
+    //   {
+    //     std::cerr << "Bad deadband value. Message ignored!" << std::endl;
+    //   }
+    //   return 1;
+    // }
 
     else if (strcmp(headerMsg->GetDeviceName(), kMsgBody.ALPHA.c_str()) == 0)
     {
@@ -178,19 +178,19 @@ int ProstateRobotPhaseBase::CheckCommonMessage(igtl::MessageHeader *headerMsg)
       return 1;
     }
     
-    else if (strcmp(headerMsg->GetDeviceName(), kMsgBody.TARGET_ANGLE.c_str()) == 0)
-    {
-      try
-      {
-        double theta_d = std::stod(string_msg_content);
-        RStatus->SetTargetAngle(theta_d);
-      }
-      catch(const std::invalid_argument&e)
-      {
-        std::cerr << e.what() << std::endl;
-      }
-      return 1;
-    }
+    // else if (strcmp(headerMsg->GetDeviceName(), kMsgBody.TARGET_ANGLE.c_str()) == 0)
+    // {
+    //   try
+    //   {
+    //     double theta_d = std::stod(string_msg_content);
+    //     RStatus->SetTargetAngle(theta_d);
+    //   }
+    //   catch(const std::invalid_argument&e)
+    //   {
+    //     std::cerr << e.what() << std::endl;
+    //   }
+    //   return 1;
+    // }
 
     else if (strcmp(headerMsg->GetDeviceName(), kMsgBody.CURV_METHOD.c_str()) == 0)
     {
@@ -207,18 +207,18 @@ int ProstateRobotPhaseBase::CheckCommonMessage(igtl::MessageHeader *headerMsg)
       // Send acknowledgment for successful needle retraction.
       return 1;
     }
-    else if (strcmp(headerMsg->GetDeviceName(), kMsgBody.SET_STEERING.c_str()) == 0)
-    {
-      try
-      {
-        RStatus->SetSteeringMethod(string_msg_content);
-      }
-      catch(const std::invalid_argument &e)
-      {
-        std::cerr << e.what() << std::endl;
-      }
-      return 1;
-    }
+    // else if (strcmp(headerMsg->GetDeviceName(), kMsgBody.SET_STEERING.c_str()) == 0)
+    // {
+    //   try
+    //   {
+    //     RStatus->SetSteeringMethod(string_msg_content);
+    //   }
+    //   catch(const std::invalid_argument &e)
+    //   {
+    //     std::cerr << e.what() << std::endl;
+    //   }
+    //   return 1;
+    // }
     // Catch all undefined string messages
     else
     {

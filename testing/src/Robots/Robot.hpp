@@ -12,7 +12,6 @@
 
 #include "Eigen/Dense"
 
-#include "Motor.hpp"
 #include "Timer.hpp"
 #include "Logger.hpp"
 
@@ -61,9 +60,7 @@ public:
 	virtual void SetTargetImageCoord(const Eigen::Matrix<double, 4, 4, Eigen::DontAlign> &) = 0;
 	virtual void RunInverseKinematics() = 0;
 	virtual void SetTargetPointPosVectorImageCoord(const Eigen::Matrix<double, 3, 1, Eigen::DontAlign> &) = 0;
-	virtual Motor *GetMotor(int cardID) = 0;
 	virtual vector<string> GetRobotModesList() = 0;
-	virtual vector<Motor *> ListMotors() = 0;
 	virtual Eigen::Matrix<double, 4, 4, Eigen::DontAlign> ConvertFromImagerToRobotBase(const Eigen::Matrix<double, 4, 4, Eigen::DontAlign> &) = 0;
 	virtual Eigen::Matrix<double, 4, 4, Eigen::DontAlign> ConvertFromRobotBaseToImager(const Eigen::Matrix<double, 4, 4, Eigen::DontAlign> &) = 0;
 	virtual Eigen::Matrix<double, 3, 1, Eigen::DontAlign> GetTargetPointPosVectorImageCoord() = 0;

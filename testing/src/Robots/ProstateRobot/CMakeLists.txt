@@ -21,10 +21,8 @@ add_library(ProstateRobot
 target_link_libraries(ProstateRobot
   ProstateRobotUtils
   ProstateKinematics
-  BicycleKinematics
   CurvSteering
   PolyFit
-  ForceSensor
   ProstateRobotKinematicsController
   ProstateRobotMotionController
   ProstateRobotSensors
