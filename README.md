@@ -6,7 +6,12 @@ Change directories of `EIGEN_DIR`, `IGTL_DIR`, `BOOST_DIR`, `SURGICAL_ROBOT_SOUR
 
 `EIGEN_DIR`: Eigen library path.
 
-`IGTL_DIR`: OpenIGTLink path.
+`IGTL_DIR`: OpenIGTLink path. (Optional)
+
+Change Line 3 in `testing/src/Communication/OpenIGTLink/CMakeLists.txt` to your OpenIGTLink build path.
+
+Please use OpenIGTLink_Protocol_Version3
+`https://github.com/openigtlink/OpenIGTLink/releases/tag/v3.0v`
 
 `BOOST_DIR`: BOOST library path.
 
@@ -14,7 +19,6 @@ Change directories of `EIGEN_DIR`, `IGTL_DIR`, `BOOST_DIR`, `SURGICAL_ROBOT_SOUR
 
 `PROSTATE_COMM_SOURCE_DIR`: Path of this repo.
 
-May also need to change Line 3 in `testing/src/Communication/OpenIGTLink/CMakeLists.txt` to your OpenIGTLink build path.
 
 
 ## Build 
